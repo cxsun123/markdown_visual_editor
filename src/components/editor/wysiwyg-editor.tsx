@@ -94,6 +94,7 @@ export function WysiwygEditor({
   // Single source of truth: markdown content
   const [markdownContent, setMarkdownContent] = useState(content);
   const markdownContentRef = useRef(content);
+  const editorContentRef = useRef(content);
 
   // Flag to prevent circular updates
   const isUpdatingFromSource = useRef(false);
@@ -327,9 +328,15 @@ export function WysiwygEditor({
 
   // Sync external content changes (only when not from internal update)
   useEffect(() => {
-    if (editor && !isUpdatingFromWysiwyg.current && content !== markdownContentRef.current) {
-      editor.commands.setContent(content);
-    }
+    if (!editor || isUpdatingFromWysiwyg.current || content === editorContentRef.current) return;
+    editorContentRef.current = content;
+
+    const migrated = migrateMarkdownSyntax(content);
+    marked.setOptions({ breaks: true, gfm: true });
+    const html = marked.parse(migrated) as string;
+    const fullJson = generateJSON(html, defaultExtensions);
+    const contentNodes = fullJson.content || [];
+    editor.chain().clearContent().insertContent(contentNodes).run();
   }, [content, editor]);
 
   useEffect(() => {
