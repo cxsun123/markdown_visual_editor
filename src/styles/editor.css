@@ -1,0 +1,658 @@
+/* Tiptap Editor Styles */
+
+/* 基础样式 */
+.tiptap {
+  outline: none;
+  min-height: 400px;
+  padding: 1rem;
+}
+
+.tiptap > * + * {
+  margin-top: 0.75em;
+}
+
+/* 标题样式 */
+.tiptap h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+.tiptap h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.tiptap h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.tiptap h4 {
+  font-size: 1em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.tiptap h5 {
+  font-size: 0.875em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.5;
+}
+
+.tiptap h6 {
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.5;
+  color: #666;
+}
+
+/* 段落 */
+.tiptap p {
+  margin: 0.5em 0;
+  line-height: 1.6;
+}
+
+/* 粗体 */
+.tiptap strong {
+  font-weight: bold;
+}
+
+/* 斜体 */
+.tiptap em {
+  font-style: italic;
+}
+
+/* 删除线 */
+.tiptap s {
+  text-decoration: line-through;
+}
+
+/* 行内代码 */
+.tiptap code {
+  background-color: #f3f4f6;
+  color: #171717;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+.tiptap pre {
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.tiptap pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875em;
+}
+
+/* 引用块 */
+.tiptap blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* 列表 */
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap li {
+  margin: 0.25em 0;
+  line-height: 1.6;
+}
+
+.tiptap li > p {
+  margin: 0;
+}
+
+/* 任务列表 */
+.tiptap ul[data-type="taskList"] {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.25em;
+}
+
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+
+.tiptap ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* 表格 */
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  overflow: hidden;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid #e5e7eb;
+  padding: 0.5em 0.75em;
+  text-align: left;
+  position: relative;
+  min-width: 100px;
+}
+
+.tiptap table th {
+  background-color: #e5e7eb;
+  font-weight: bold;
+  color: #171717;
+}
+
+.dark .tiptap table td,
+.dark .tiptap table th {
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .tiptap table th {
+  background-color: #374151;
+}
+
+.dark .tiptap table td.selected,
+.dark .tiptap table th.selected {
+  background-color: #1e3a5f;
+}
+
+.dark .tiptap table .column-resize-handle {
+  background-color: #60a5fa;
+}
+
+.dark .tiptap code {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+.dark .tiptap hr {
+  border-color: #4b5563;
+}
+
+.tiptap table td.selected,
+.tiptap table th.selected {
+  background-color: #dbeafe;
+}
+
+.tiptap table .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+}
+
+.tiptap table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+  cursor: col-resize;
+}
+
+/* 分割线 */
+.tiptap hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 1.5em 0;
+}
+
+/* 链接 */
+.tiptap a {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: #2563eb;
+}
+
+/* 图片 */
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5em;
+  display: inline;
+  margin: 0;
+}
+
+.tiptap p > img {
+  display: inline;
+  margin: 0 0.25em;
+}
+
+.tiptap img:only-child {
+  display: block;
+  margin: 1em 0;
+}
+
+/* 高亮 */
+.tiptap mark {
+  background-color: #fef08a;
+  padding: 0.1em 0.2em;
+  border-radius: 0.2em;
+}
+
+/* 下标 */
+.tiptap sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+
+/* 上标 */
+.tiptap sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* Placeholder 样式 */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+/* 选中文本样式 */
+.tiptap ::selection {
+  background-color: #bfdbfe;
+  color: #1f2937;
+}
+
+/* 空列表项 */
+.tiptap li::marker {
+  color: #6b7280;
+}
+
+/* 鼠标悬停样式 - 显示边框，不改变背景色 */
+.tiptap p:hover,
+.tiptap h1:hover,
+.tiptap h2:hover,
+.tiptap h3:hover,
+.tiptap h4:hover,
+.tiptap h5:hover,
+.tiptap h6:hover,
+.tiptap li:hover,
+.tiptap blockquote:hover,
+.tiptap pre:hover {
+  outline: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.tiptap a:hover {
+  color: #2563eb;
+}
+
+/* 表格调整大小手柄 */
+.resize-cursor {
+  cursor: col-resize;
+}
+
+/* 图片编辑模式 */
+.image-view-wrapper {
+  display: inline-block;
+  position: relative;
+}
+
+.image-view-wrapper img {
+  cursor: pointer;
+}
+
+.image-view-wrapper img:hover {
+  outline: 2px dashed #3b82f6;
+  outline-offset: 2px;
+}
+
+.image-edit-wrapper {
+  display: inline-block;
+}
+
+.image-edit-textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #fef3c7;
+  color: #1f2937;
+  border: 1px solid #f59e0b;
+  border-radius: 0.25em;
+  padding: 0.5em;
+  outline: none;
+  width: 100%;
+  min-width: 300px;
+  min-height: 2em;
+  resize: both;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.image-edit-textarea::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.image-edit-textarea:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
+}
+
+/* 链接编辑模式 */
+.link-view-wrapper {
+  display: inline;
+}
+
+.link-view-wrapper a {
+  cursor: pointer;
+}
+
+.link-view-wrapper a:hover {
+  outline: 2px dashed #3b82f6;
+  outline-offset: 2px;
+}
+
+.link-edit-wrapper {
+  display: inline-block;
+}
+
+.link-edit-textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+  border-radius: 0.25em;
+  padding: 0.5em;
+  outline: none;
+  width: 100%;
+  min-width: 250px;
+  resize: both;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.link-edit-textarea::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.link-edit-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 标题编辑模式 */
+.heading-view-wrapper {
+  display: block;
+}
+
+.heading-view-wrapper h1,
+.heading-view-wrapper h2,
+.heading-view-wrapper h3,
+.heading-view-wrapper h4,
+.heading-view-wrapper h5,
+.heading-view-wrapper h6 {
+  cursor: pointer;
+}
+
+.heading-view-wrapper h1:hover,
+.heading-view-wrapper h2:hover,
+.heading-view-wrapper h3:hover,
+.heading-view-wrapper h4:hover,
+.heading-view-wrapper h5:hover,
+.heading-view-wrapper h6:hover {
+  outline: 2px dashed #10b981;
+  outline-offset: 2px;
+}
+
+.heading-edit-wrapper {
+  display: block;
+}
+
+.heading-edit-textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+  border-radius: 0.25em;
+  padding: 0.5em;
+  outline: none;
+  width: 100%;
+  min-width: 200px;
+  resize: both;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.heading-edit-textarea::selection {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.heading-edit-textarea:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* 引用块编辑模式 */
+.blockquote-view-wrapper {
+  display: block;
+}
+
+.blockquote-view-wrapper blockquote {
+  cursor: pointer;
+}
+
+.blockquote-view-wrapper blockquote:hover {
+  outline: 2px dashed #8b5cf6;
+  outline-offset: 2px;
+}
+
+.blockquote-edit-wrapper {
+  display: block;
+}
+
+.blockquote-edit-textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875em;
+  background-color: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #8b5cf6;
+  border-radius: 0.25em;
+  padding: 0.5em;
+  outline: none;
+  width: 100%;
+  min-width: 250px;
+  min-height: 4em;
+  resize: both;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.blockquote-edit-textarea::selection {
+  background-color: #8b5cf6;
+  color: #ffffff;
+}
+
+.blockquote-edit-textarea:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+/* Dark mode */
+.dark .tiptap {
+  color: #e5e7eb;
+}
+
+.dark .tiptap p {
+  color: #e5e7eb;
+}
+
+.dark .tiptap h1,
+.dark .tiptap h2,
+.dark .tiptap h3,
+.dark .tiptap h4,
+.dark .tiptap h5,
+.dark .tiptap h6 {
+  color: #f9fafb;
+}
+
+.dark .tiptap a {
+  color: #60a5fa;
+}
+
+.dark .tiptap blockquote {
+  color: #9ca3af;
+  border-left-color: #4b5563;
+}
+
+.dark .tiptap mark {
+  background-color: #854d0e;
+  color: #fef3c7;
+}
+
+.dark .tiptap pre {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark .tiptap table {
+  border-color: #4b5563;
+}
+
+.dark .tiptap ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  color: #6b7280;
+}
+
+.dark .tiptap .is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .tiptap {
+    padding: 0.75rem;
+    font-size: 0.95em;
+  }
+
+  .tiptap h1 {
+    font-size: 1.5em;
+  }
+
+  .tiptap h2 {
+    font-size: 1.3em;
+  }
+
+  .tiptap h3 {
+    font-size: 1.15em;
+  }
+
+  .tiptap pre {
+    padding: 0.75em;
+    font-size: 0.8em;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tiptap table td,
+  .tiptap table th {
+    padding: 0.4em 0.5em;
+    min-width: 80px;
+  }
+
+  .heading-edit-textarea,
+  .blockquote-edit-textarea,
+  .image-edit-textarea,
+  .link-edit-textarea {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .tiptap p:hover,
+  .tiptap h1:hover,
+  .tiptap h2:hover,
+  .tiptap h3:hover,
+  .tiptap h4:hover,
+  .tiptap h5:hover,
+  .tiptap h6:hover,
+  .tiptap li:hover,
+  .tiptap blockquote:hover,
+  .tiptap pre:hover {
+    outline: none;
+  }
+
+  .heading-view-wrapper h1:active,
+  .heading-view-wrapper h2:active,
+  .heading-view-wrapper h3:active,
+  .heading-view-wrapper h4:active,
+  .heading-view-wrapper h5:active,
+  .heading-view-wrapper h6:active {
+    outline: 2px dashed #10b981;
+    outline-offset: 2px;
+  }
+
+  .blockquote-view-wrapper blockquote:active {
+    outline: 2px dashed #8b5cf6;
+    outline-offset: 2px;
+  }
+
+  .image-view-wrapper img:active {
+    outline: 2px dashed #3b82f6;
+    outline-offset: 2px;
+  }
+}

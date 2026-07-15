@@ -1,0 +1,9 @@
+services:
+  editor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3003}:3000"
+    volumes:
+      - ./public/article_example.md:/app/public/article_example.md
