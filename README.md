@@ -2,11 +2,21 @@
 
 一个类似 Microsoft Word 的所见即所得 Markdown 编辑器，支持完整的 Markdown 语法。
 
+🌐 **在线示例**：[https://md.tech616.me](https://md.tech616.me)
+
 ## 截图
 
-| Light 模式 | 字体颜色选择器 | Dark 模式 |
-|---|---|---|
-| ![screenshot1](public/screenshot1.png) | ![screenshot2](public/screenshot2.png) | ![screenshot3](public/screenshot3.png) |
+![Light 模式](public/screenshot1.png)
+
+*Light 模式*
+
+![字体颜色选择器](public/screenshot2.png)
+
+*字体颜色选择器*
+
+![Dark 模式](public/screenshot3.png)
+
+*Dark 模式*
 
 ## 功能特性
 
