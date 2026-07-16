@@ -198,7 +198,7 @@ export function WysiwygEditor({
     editorProps: {
       attributes: {
         class:
-          'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none min-h-[400px] p-4',
+          'focus:outline-none focus:outline-none min-h-[400px] p-4',
       },
       handlePaste: (_view, event) => {
         const text = event.clipboardData?.getData('text/plain') || '';

@@ -79,6 +79,13 @@ body {
   background-color: #f6f8fa;
   border-radius: 6px;
 }
+.dark .markdown-preview pre {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+.dark .markdown-preview code {
+  background-color: rgba(255, 255, 255, 0.08);
+}
 .markdown-preview pre code {
   display: inline;
   padding: 0;
@@ -114,6 +121,20 @@ body {
 .markdown-preview table tr:nth-child(2n) {
   background-color: #f6f8fa;
 }
+.dark .markdown-preview table tr {
+  background-color: transparent;
+}
+.dark .markdown-preview table tr:nth-child(2n) {
+  background-color: #1f2937;
+}
+.dark .markdown-preview table th,
+.dark .markdown-preview table td {
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+.dark .markdown-preview table th {
+  background-color: #374151;
+}
 .markdown-preview hr {
   height: 0.25em;
   padding: 0;
@@ -127,6 +148,9 @@ body {
 }
 .markdown-preview a:hover {
   text-decoration: underline;
+}
+.markdown-preview a + br {
+  display: none;
 }
 .markdown-preview ul, .markdown-preview ol {
   padding-left: 2em;

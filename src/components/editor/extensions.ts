@@ -28,6 +28,7 @@ import { BlockquoteNodeView } from './blockquote-node-view';
 import { MermaidNodeView } from './mermaid-node-view';
 import { CodeBlockNodeView } from './code-block-node-view';
 import { LinkDoubleClickListener } from './link-double-click';
+import { HtmlBlock } from './html-block';
 
 const lowlight = createLowlight(common);
 
@@ -277,6 +278,7 @@ export const defaultExtensions = [
   TableCell,
   TableHeader,
   CodeBlock,
+  HtmlBlock,
   Subscript,
   Superscript,
   LinkDoubleClickListener,

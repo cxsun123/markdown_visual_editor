@@ -8,7 +8,7 @@
 }
 
 .tiptap > * + * {
-  margin-top: 0.75em;
+  margin-top: 0.35em;
 }
 
 /* 标题样式 */
@@ -63,7 +63,7 @@
 
 /* 段落 */
 .tiptap p {
-  margin: 0.5em 0;
+  margin: 0.25em 0;
   line-height: 1.6;
 }
 
@@ -122,13 +122,13 @@
 .tiptap ul {
   list-style-type: disc;
   padding-left: 1.5em;
-  margin: 0.5em 0;
+  margin: 0.25em 0;
 }
 
 .tiptap ol {
   list-style-type: decimal;
   padding-left: 1.5em;
-  margin: 0.5em 0;
+  margin: 0.25em 0;
 }
 
 .tiptap li {
@@ -532,6 +532,18 @@
 }
 
 /* Dark mode */
+
+/* htmlBlock: collapse <br> after <a> so badges flow inline like GitHub */
+.html-block a + br {
+  display: none;
+}
+
+
+/* htmlBlock: collapse <br> after <a> so badges flow inline like GitHub */
+.html-block a + br {
+  display: none;
+}
+
 .dark .tiptap {
   color: #e5e7eb;
 }
