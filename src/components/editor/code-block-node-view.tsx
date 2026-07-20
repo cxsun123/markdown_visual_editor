@@ -4,7 +4,9 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
 import { common, createLowlight } from 'lowlight';
 import { toHtml } from 'hast-util-to-html';
-import { createLongPressHandler } from '@/lib/touch-edit';
+import { createLongPressHandler } from '../../lib/touch-edit';
+import { getEditorMessages } from './i18n';
+import { useEditorLocale } from './locale-context';
 
 const lowlight = createLowlight(common);
 
@@ -13,6 +15,8 @@ function escapeHtml(text: string): string {
 }
 
 export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttributes, editor }) => {
+  const locale = useEditorLocale();
+  const nv = getEditorMessages(locale).nodeViews;
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.textContent);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -119,8 +123,8 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
       <NodeViewWrapper as="div" className="code-block-edit-wrapper my-4">
         <div className="border rounded-lg overflow-hidden">
           <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs text-gray-500 flex items-center justify-between">
-            <span>代码编辑器 - {language}</span>
-            <span className="text-gray-400">Ctrl+Enter 保存 | Esc 取消 | Tab 缩进</span>
+            <span>{nv.codeEditor} - {language}</span>
+            <span className="text-gray-400">{nv.codeSaveHint}</span>
           </div>
           <div className="relative">
             <pre
@@ -151,14 +155,14 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
               onClick={handleSave}
               className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
             >
-              保存
+              {nv.save}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              取消
+              {nv.cancel}
             </button>
           </div>
         </div>
@@ -174,7 +178,7 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
       <div className="relative group">
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-            {language || 'text'} | 长按编辑
+            {language || 'text'} | {nv.longPressEdit}
           </span>
         </div>
         <pre

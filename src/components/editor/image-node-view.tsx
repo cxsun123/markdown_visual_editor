@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
-import { createLongPressHandler } from '@/lib/touch-edit';
+import { createLongPressHandler } from '../../lib/touch-edit';
 
 export const ImageNodeView: React.FC<NodeViewProps> = ({ node, updateAttributes, editor, getPos }) => {
   const [isEditing, setIsEditing] = useState(false);

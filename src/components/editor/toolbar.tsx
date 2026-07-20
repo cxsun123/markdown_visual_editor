@@ -29,9 +29,20 @@ import {
 } from 'lucide-react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ColorPickerPanel } from './color-picker-panel';
+import { TooltipProvider } from './tooltip-provider';
+import { getEditorMessages, type Locale } from './i18n';
+
+export interface ToolbarCustomTool {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  onClick: (editor: Editor) => void;
+}
 
 interface ToolbarProps {
   editor: Editor | null;
+  customTools?: ToolbarCustomTool[];
+  locale?: Locale;
 }
 
 const FONT_COLORS = [
@@ -52,7 +63,8 @@ const BG_COLORS = [
   '#999999', '#CCCCCC', '#666666', '#333333',
 ];
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, customTools, locale = 'en' }: ToolbarProps) {
+  const m = getEditorMessages(locale);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [showHeadingMenu, setShowHeadingMenu] = useState(false);
@@ -105,11 +117,11 @@ export function Toolbar({ editor }: ToolbarProps) {
   }, [editor, linkUrl]);
 
   const addImage = useCallback(() => {
-    const url = prompt('请输入图片URL:');
+    const url = prompt(m.prompts.imageUrl);
     if (url && editor) {
       editor.chain().focus().setImage({ src: url }).run();
     }
-  }, [editor]);
+  }, [editor, m]);
 
   const addTable = useCallback(() => {
     if (editor) {
@@ -186,12 +198,12 @@ export function Toolbar({ editor }: ToolbarProps) {
   const currentHeadingLevel = getCurrentHeadingLevel();
 
   const headingOptions = [
-    { level: 1, label: '标题 1', size: 'text-xl font-bold' },
-    { level: 2, label: '标题 2', size: 'text-lg font-bold' },
-    { level: 3, label: '标题 3', size: 'text-base font-bold' },
-    { level: 4, label: '标题 4', size: 'text-sm font-bold' },
-    { level: 5, label: '标题 5', size: 'text-xs font-bold' },
-    { level: 6, label: '标题 6', size: 'text-xs font-bold text-gray-600' },
+    { level: 1, label: m.headings[0].label, size: 'text-xl font-bold' },
+    { level: 2, label: m.headings[1].label, size: 'text-lg font-bold' },
+    { level: 3, label: m.headings[2].label, size: 'text-base font-bold' },
+    { level: 4, label: m.headings[3].label, size: 'text-sm font-bold' },
+    { level: 5, label: m.headings[4].label, size: 'text-xs font-bold' },
+    { level: 6, label: m.headings[5].label, size: 'text-xs font-bold text-gray-600' },
   ];
 
   if (!editor) {
@@ -199,6 +211,7 @@ export function Toolbar({ editor }: ToolbarProps) {
   }
 
   return (
+    <TooltipProvider>
     <div className="flex items-center gap-1 p-2 border-b bg-gray-50 dark:bg-gray-800 flex-wrap">
       {/* 撤销/重做 */}
       <button
@@ -206,7 +219,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-        title="撤销 (Ctrl+Z)"
+        title={m.toolbar.undo}
       >
         <Undo className="h-4 w-4" />
       </button>
@@ -215,7 +228,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-        title="重做 (Ctrl+Shift+Z)"
+        title={m.toolbar.redo}
       >
         <Redo className="h-4 w-4" />
       </button>
@@ -230,7 +243,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           className={`flex items-center gap-1 p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
             currentHeadingLevel > 0 ? 'bg-gray-200 dark:bg-gray-700' : ''
           }`}
-          title="标题"
+          title={m.toolbar.heading}
         >
           {currentHeadingLevel > 0 ? (
             <span className="text-sm font-bold">H{currentHeadingLevel}</span>
@@ -268,7 +281,7 @@ export function Toolbar({ editor }: ToolbarProps) {
                   currentHeadingLevel === 0 && editor.isActive('paragraph') ? 'bg-gray-100 dark:bg-gray-700' : ''
                 }`}
               >
-                <span className="text-sm">正文</span>
+                <span className="text-sm">{m.toolbar.paragraph}</span>
               </button>
             </div>
           </div>
@@ -284,7 +297,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('bold') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="粗体 (Ctrl+B)"
+        title={m.toolbar.bold}
       >
         <Bold className="h-4 w-4" />
       </button>
@@ -294,7 +307,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('italic') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="斜体 (Ctrl+I)"
+        title={m.toolbar.italic}
       >
         <Italic className="h-4 w-4" />
       </button>
@@ -304,7 +317,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('strike') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="删除线"
+        title={m.toolbar.strike}
       >
         <Strikethrough className="h-4 w-4" />
       </button>
@@ -314,7 +327,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('code') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="行内代码"
+        title={m.toolbar.inlineCode}
       >
         <Code className="h-4 w-4" />
       </button>
@@ -324,7 +337,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="高亮"
+        title={m.toolbar.highlight}
       >
         <Highlighter className="h-4 w-4" />
       </button>
@@ -335,7 +348,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           type="button"
           onClick={() => setShowFontColorPicker(!showFontColorPicker)}
           className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 relative"
-          title="字体颜色"
+          title={m.toolbar.fontColor}
         >
           <Palette className="h-4 w-4" />
           <div
@@ -367,7 +380,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           type="button"
           onClick={() => setShowBgColorPicker(!showBgColorPicker)}
           className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 relative"
-          title="背景颜色"
+          title={m.toolbar.bgColor}
         >
           <PaintBucket className="h-4 w-4" />
           <div
@@ -398,7 +411,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('subscript') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="下标"
+        title={m.toolbar.subscript}
       >
         <Subscript className="h-4 w-4" />
       </button>
@@ -410,7 +423,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             ? 'bg-gray-200 dark:bg-gray-700'
             : ''
         }`}
-        title="上标"
+        title={m.toolbar.superscript}
       >
         <Superscript className="h-4 w-4" />
       </button>
@@ -424,7 +437,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="无序列表"
+        title={m.toolbar.bulletList}
       >
         <List className="h-4 w-4" />
       </button>
@@ -436,7 +449,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             ? 'bg-gray-200 dark:bg-gray-700'
             : ''
         }`}
-        title="有序列表"
+        title={m.toolbar.orderedList}
       >
         <ListOrdered className="h-4 w-4" />
       </button>
@@ -446,7 +459,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('taskList') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="任务列表"
+        title={m.toolbar.taskList}
       >
         <ListChecks className="h-4 w-4" />
       </button>
@@ -456,7 +469,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="引用块"
+        title={m.toolbar.blockquote}
       >
         <Quote className="h-4 w-4" />
       </button>
@@ -466,15 +479,15 @@ export function Toolbar({ editor }: ToolbarProps) {
         className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
           editor.isActive('codeBlock') ? 'bg-gray-200 dark:bg-gray-700' : ''
         }`}
-        title="代码块"
+        title={m.toolbar.codeBlock}
       >
         <CodeSquare className="h-4 w-4" />
       </button>
       <button
         type="button"
-        onClick={() => {
-          const latex = prompt('输入 LaTeX 公式:', 'E = mc^2');
-          if (latex) {
+          onClick={() => {
+            const latex = prompt(m.prompts.inlineMath, 'E = mc^2');
+            if (latex) {
             editor.chain().focus().insertContent({
               type: 'inlineMath',
               attrs: { latex },
@@ -482,14 +495,14 @@ export function Toolbar({ editor }: ToolbarProps) {
           }
         }}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-        title="行内公式 (KaTeX)"
+        title={m.toolbar.inlineMath}
       >
         <Sigma className="h-4 w-4" />
       </button>
       <button
         type="button"
         onClick={() => {
-          const latex = prompt('输入 LaTeX 公式:', '\\int_a^b x^2 dx');
+          const latex = prompt(m.prompts.blockMath, '\\int_a^b x^2 dx');
           if (latex) {
             editor.chain().focus().insertContent({
               type: 'blockMath',
@@ -498,14 +511,14 @@ export function Toolbar({ editor }: ToolbarProps) {
           }
         }}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-        title="块级公式 (KaTeX)"
+        title={m.toolbar.blockMath}
       >
         <span className="text-xs font-bold">∑</span>
       </button>
       <button
         type="button"
         onClick={() => {
-          const code = prompt('输入 Mermaid 图表代码:', 'graph TD\n  A[开始] --> B{判断}\n  B -->|是| C[执行]\n  B -->|否| D[结束]');
+          const code = prompt(m.prompts.mermaid, 'graph TD\n  A[开始] --> B{判断}\n  B -->|是| C[执行]\n  B -->|否| D[结束]');
           if (code) {
             editor.chain().focus().insertContent({
               type: 'codeBlock',
@@ -515,7 +528,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           }
         }}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-        title="流程图/序列图 (Mermaid)"
+        title={m.toolbar.mermaid}
       >
         <GitBranch className="h-4 w-4" />
       </button>
@@ -525,7 +538,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().setHorizontalRule().run()
         }
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-        title="分割线"
+        title={m.toolbar.horizontalRule}
       >
         <Minus className="h-4 w-4" />
       </button>
@@ -540,7 +553,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
             editor.isActive('link') ? 'bg-gray-200 dark:bg-gray-700' : ''
           }`}
-          title="插入链接"
+          title={m.toolbar.insertLink}
         >
           <Link className="h-4 w-4" />
         </button>
@@ -551,7 +564,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               type="url"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder={m.prompts.linkPlaceholder}
               className="px-2 py-1 border rounded text-sm w-48"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -566,7 +579,7 @@ export function Toolbar({ editor }: ToolbarProps) {
                 onClick={setLink}
                 className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
               >
-                确定
+                {m.toolbar.confirm}
               </button>
               <button
                 type="button"
@@ -576,7 +589,7 @@ export function Toolbar({ editor }: ToolbarProps) {
                 }}
                 className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
               >
-                取消
+                {m.toolbar.cancel}
               </button>
             </div>
           </div>
@@ -586,7 +599,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         type="button"
         onClick={addImage}
         className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-        title="插入图片"
+          title={m.toolbar.insertImage}
       >
         <Image className="h-4 w-4" />
       </button>
@@ -603,7 +616,7 @@ export function Toolbar({ editor }: ToolbarProps) {
           className={`p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${
             isInTable ? 'bg-gray-200 dark:bg-gray-700' : ''
           }`}
-          title={isInTable ? '表格操作' : '插入表格'}
+          title={isInTable ? m.toolbar.table : m.toolbar.tableInsert}
         >
           <Table className="h-4 w-4" />
         </button>
@@ -611,11 +624,20 @@ export function Toolbar({ editor }: ToolbarProps) {
           <div className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 border rounded shadow-lg z-20 min-w-[160px]">
             <button
               type="button"
+              onClick={() => { addTable(); setShowTableMenu(false); }}
+              className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+              {m.toolbar.tableInsert}
+            </button>
+            <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
+            <button
+              type="button"
               onClick={deleteTable}
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-              删除表格
+              {m.toolbar.tableDelete}
             </button>
             <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
             <button
@@ -624,7 +646,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              上方插入行
+              {m.toolbar.rowInsertBefore}
             </button>
             <button
               type="button"
@@ -632,7 +654,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              下方插入行
+              {m.toolbar.rowInsertAfter}
             </button>
             <button
               type="button"
@@ -640,7 +662,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              删除行
+              {m.toolbar.rowDelete}
             </button>
             <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
             <button
@@ -649,7 +671,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              左侧插入列
+              {m.toolbar.colInsertBefore}
             </button>
             <button
               type="button"
@@ -657,7 +679,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              右侧插入列
+              {m.toolbar.colInsertAfter}
             </button>
             <button
               type="button"
@@ -665,7 +687,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              删除列
+              {m.toolbar.colDelete}
             </button>
             <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
             <button
@@ -674,7 +696,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-              合并单元格
+              {m.toolbar.mergeCells}
             </button>
             <button
               type="button"
@@ -682,7 +704,7 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>
-              拆分单元格
+              {m.toolbar.splitCell}
             </button>
             <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
             <button
@@ -691,11 +713,29 @@ export function Toolbar({ editor }: ToolbarProps) {
               className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              表头行
+              {m.toolbar.headerRow}
             </button>
           </div>
         )}
       </div>
+
+      {customTools && customTools.length > 0 && (
+        <>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+          {customTools.map((tool) => (
+            <button
+              key={tool.id}
+              type="button"
+              onClick={() => tool.onClick(editor)}
+              className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+              title={tool.title}
+            >
+              {tool.icon}
+            </button>
+          ))}
+        </>
+      )}
     </div>
+    </TooltipProvider>
   );
 }

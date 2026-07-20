@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
-import { createLongPressHandler } from '@/lib/touch-edit';
+import { createLongPressHandler } from '../../lib/touch-edit';
+import { getEditorMessages } from './i18n';
+import { useEditorLocale } from './locale-context';
 
 function useIsDark() {
   const [isDark, setIsDark] = useState(
@@ -18,6 +20,8 @@ function useIsDark() {
 }
 
 export const MermaidNodeView: React.FC<NodeViewProps> = ({ node, updateAttributes, editor }) => {
+  const locale = useEditorLocale();
+  const nv = getEditorMessages(locale).nodeViews;
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -104,8 +108,8 @@ export const MermaidNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
       <NodeViewWrapper as="div" className="mermaid-edit-wrapper my-4">
         <div className="border rounded-lg overflow-hidden">
           <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs text-gray-500 flex items-center justify-between">
-            <span>Mermaid 图表编辑器</span>
-            <span className="text-gray-400">Ctrl+Enter 保存 | Esc 取消</span>
+            <span>{nv.mermaidEditor}</span>
+            <span className="text-gray-400">{nv.mermaidSaveHint}</span>
           </div>
           <textarea
             ref={textareaRef}
@@ -122,14 +126,14 @@ export const MermaidNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
               onClick={handleSave}
               className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
             >
-              保存
+              {nv.save}
             </button>
             <button
               type="button"
               onClick={handleCancel}
               className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
             >
-              取消
+              {nv.cancel}
             </button>
           </div>
         </div>
@@ -145,9 +149,9 @@ export const MermaidNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
     >
       {error ? (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-          <p className="font-medium">渲染错误</p>
+          <p className="font-medium">{nv.renderError}</p>
           <p className="mt-1">{error}</p>
-          <p className="mt-2 text-xs text-red-500">长按编辑源码</p>
+          <p className="mt-2 text-xs text-red-500">{nv.longPressSource}</p>
         </div>
       ) : svg ? (
         <div
@@ -156,7 +160,7 @@ export const MermaidNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
         />
       ) : (
         <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center text-gray-500">
-          加载中...
+          {nv.loading}
         </div>
       )}
     </NodeViewWrapper>

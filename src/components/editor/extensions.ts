@@ -27,6 +27,7 @@ import { HeadingNodeView } from './heading-node-view';
 import { BlockquoteNodeView } from './blockquote-node-view';
 import { MermaidNodeView } from './mermaid-node-view';
 import { CodeBlockNodeView } from './code-block-node-view';
+import { KatexCodeBlockNodeView } from './katex-code-block-node-view';
 import { LinkDoubleClickListener } from './link-double-click';
 import { HtmlBlock } from './html-block';
 
@@ -105,8 +106,12 @@ const CodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return (props) => {
       const { node } = props;
-      if (node.attrs.language === 'mermaid' || node.attrs.language === 'flow' || node.attrs.language === 'sequence' || node.attrs.language === 'seq' || node.attrs.language === 'sequenceDiagram' || node.attrs.language === 'flowchart' || node.attrs.language === 'graph') {
+      const lang = node.attrs.language;
+      if (lang === 'mermaid' || lang === 'flow' || lang === 'sequence' || lang === 'seq' || lang === 'sequenceDiagram' || lang === 'flowchart' || lang === 'graph') {
         return ReactNodeViewRenderer(MermaidNodeView)(props);
+      }
+      if (lang === 'latex' || lang === 'katex' || lang === 'math') {
+        return ReactNodeViewRenderer(KatexCodeBlockNodeView)(props);
       }
       return ReactNodeViewRenderer(CodeBlockNodeView)(props);
     };
@@ -131,6 +136,17 @@ const MathWithMarkdown = Mathematics.configure({
  * parsed to the correct HTML that Mathematics's parseHTML rules understand.
  * Uses a distinct name to avoid schema conflicts with the real inlineMath/blockMath nodes.
  */
+function stripLatexDelimiters(s: string): string {
+  let t = s.trim();
+  if (t.startsWith('\\[') && t.endsWith('\\]')) {
+    t = t.slice(2, -2).trim();
+  }
+  if (t.startsWith('\\(') && t.endsWith('\\)')) {
+    t = t.slice(2, -2).trim();
+  }
+  return t;
+}
+
 const MathMarkdownBridge = Extension.create({
   name: 'mathMarkdownBridge',
   addStorage() {
@@ -185,7 +201,7 @@ const MathMarkdownBridge = Extension.create({
               if (singleLineMatch) {
                 if (silent) return true;
                 const token = state.push('blockMath', '', 0);
-                token.content = singleLineMatch[1].trim();
+                token.content = stripLatexDelimiters(singleLineMatch[1]);
                 token.markup = '$$';
                 token.map = [startLine, startLine + 1];
                 state.line = startLine + 1;
@@ -208,7 +224,7 @@ const MathMarkdownBridge = Extension.create({
                     contentLines.push(state.src.slice(lStart, lMax));
                   }
                   const token = state.push('blockMath', '', 0);
-                  token.content = contentLines.join('\n').trim();
+                  token.content = stripLatexDelimiters(contentLines.join('\n'));
                   token.markup = '$$';
                   token.map = [startLine, nextLine + 1];
                   state.line = nextLine + 1;
@@ -244,7 +260,7 @@ export const defaultExtensions = [
     codeBlock: false,
   }),
   Placeholder.configure({
-    placeholder: '开始写作...\n支持 Markdown 语法',
+    placeholder: 'Start writing...\nMarkdown supported',
   }),
   Highlight.configure({ multicolor: true }),
   Typography,

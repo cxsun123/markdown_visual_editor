@@ -1,7 +1,20 @@
 {
-  "name": "markdown-visual-editor",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@chengxinsun26/editor",
+  "version": "0.3.7",
+  "private": false,
+  "exports": {
+    ".": "./src/components/editor/index.ts",
+    "./lib/markdown-migrate": "./src/lib/markdown-migrate.ts",
+    "./lib/markdown-to-html": "./src/lib/markdown-to-html.ts",
+    "./lib/touch-edit": "./src/lib/touch-edit.ts",
+    "./styles/editor.css": "./src/styles/editor.css",
+    "./styles/hljs-source.css": "./src/styles/hljs-source.css"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19",
+    "next": "^16"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,6 +22,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tiptap/core": "^3.27.4",
+    "@tiptap/extension-blockquote": "^3.27.4",
+    "@tiptap/extension-heading": "^3.27.4",
     "@tiptap/extension-code-block-lowlight": "^3.27.4",
     "@tiptap/extension-color": "^3.27.4",
     "@tiptap/extension-highlight": "^3.27.4",
@@ -43,6 +59,7 @@
     "mermaid": "^11.16.0",
     "next": "16.2.10",
     "node-emoji": "^2.2.0",
+    "prosemirror-state": "^1.4.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "remark-gfm": "^4.0.1",

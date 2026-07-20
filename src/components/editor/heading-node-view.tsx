@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { NodeViewWrapper, NodeViewContent, NodeViewProps } from '@tiptap/react';
-import { createLongPressHandler } from '@/lib/touch-edit';
+import { createLongPressHandler } from '../../lib/touch-edit';
 
 function serializeNodeToMarkdown(node: unknown): string {
   const n = node as Record<string, unknown>;

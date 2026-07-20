@@ -2,19 +2,25 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import { defaultExtensions } from './extensions';
-import { Toolbar } from './toolbar';
+import { Toolbar, type ToolbarCustomTool } from './toolbar';
+import { FloatingToolbar } from './floating-toolbar';
 import { SourcePanel } from './source-panel';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { generateJSON } from '@tiptap/core';
 import { marked } from 'marked';
-import { migrateMarkdownSyntax } from '@/lib/markdown-migrate';
+import { migrateMarkdownSyntax } from '../../lib/markdown-migrate';
+import { getEditorMessages, type Locale } from './i18n';
+import { EditorLocaleProvider } from './locale-context';
 
-interface WysiwygEditorProps {
+export interface WysiwygEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   placeholder?: string;
   showSource: boolean;
   onToggleSource: () => void;
+  customTools?: ToolbarCustomTool[];
+  floatingToolbar?: boolean;
+  locale?: Locale;
 }
 
 function isMarkdownContent(text: string): boolean {
@@ -81,7 +87,11 @@ export function WysiwygEditor({
   onChange,
   showSource,
   onToggleSource,
+  customTools,
+  floatingToolbar = true,
+  locale = 'en',
 }: WysiwygEditorProps) {
+  const m = getEditorMessages(locale);
   const editorRef = useRef<any>(null);
   const onChangeRef = useRef(onChange);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -138,11 +148,11 @@ export function WysiwygEditor({
 
   const handleFileDrop = useCallback(async (file: File) => {
     if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
-      alert('只接受 .md 文件');
+      alert(m.drop.onlyMd);
       return;
     }
 
-    if (!confirm('当前内容会被替换，是否继续？')) return;
+    if (!confirm(m.drop.replaceConfirm)) return;
 
     try {
       const text = await file.text();
@@ -162,9 +172,9 @@ export function WysiwygEditor({
       }
     } catch (error) {
       console.error('Failed to parse markdown file:', error);
-      alert('文件解析失败');
+      alert(m.drop.parseFailed);
     }
-  }, []);
+  }, [m]);
 
   const editor = useEditor({
     extensions: defaultExtensions,
@@ -199,6 +209,23 @@ export function WysiwygEditor({
       attributes: {
         class:
           'focus:outline-none focus:outline-none min-h-[400px] p-4',
+      },
+      handleDOMEvents: {
+        dblclick: (view, event) => {
+          const pos = (view as any).posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!pos) return false;
+          const $pos = view.state.doc.resolve(pos.pos);
+          const node = $pos.nodeAfter;
+          if (node && (node.type.name === 'blockMath' || node.type.name === 'inlineMath')) {
+            const latex = node.attrs.latex || '';
+            const tr = view.state.tr;
+            const codeBlock = view.state.schema.node('codeBlock', { language: 'latex' }, [view.state.schema.text(latex)]);
+            tr.replaceWith(pos.pos, pos.pos + node.nodeSize, codeBlock);
+            view.dispatch(tr);
+            return true;
+          }
+          return false;
+        },
       },
       handlePaste: (_view, event) => {
         const text = event.clipboardData?.getData('text/plain') || '';
@@ -240,6 +267,32 @@ export function WysiwygEditor({
     editorRef.current = editor;
     if (editor) {
       (window as any).__tiptapEditor = editor;
+
+      // Patch serializer: tiptap-markdown maps serialize specs by extension.name,
+      // but Mathematics extension is named "mathematics", not "blockMath"/"inlineMath".
+      // Override the nodes getter to inject math serialize functions.
+      const serializer = (editor.storage as any).markdown?.serializer;
+      if (serializer) {
+        const origNodesDesc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(serializer), 'nodes');
+        if (origNodesDesc?.get) {
+          const origGet = origNodesDesc.get;
+          Object.defineProperty(serializer, 'nodes', {
+            get() {
+              const map = origGet.call(serializer);
+              map.blockMath = (state: any, node: any) => {
+                const latex = node.attrs.latex || '';
+                state.write('$$\n' + latex + '\n$$\n');
+              };
+              map.inlineMath = (state: any, node: any) => {
+                const latex = node.attrs.latex || '';
+                state.write('$' + latex + '$');
+              };
+              return map;
+            },
+            configurable: true,
+          });
+        }
+      }
     }
   }, [editor]);
 
@@ -345,7 +398,7 @@ export function WysiwygEditor({
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        const url = prompt('请输入链接URL:');
+        const url = prompt(m.prompts.linkUrl);
         if (url) {
           editor.chain().focus().setLink({ href: url }).run();
         }
@@ -408,10 +461,17 @@ export function WysiwygEditor({
   }, [tableCtx]);
 
   return (
+    <EditorLocaleProvider value={locale}>
     <div className="border rounded-lg bg-white dark:bg-gray-900 flex flex-col h-full relative">
-      <div className="flex-shrink-0">
-        <Toolbar editor={editor} />
-      </div>
+      {floatingToolbar ? (
+        <FloatingToolbar editor={editor}>
+          <Toolbar editor={editor} customTools={customTools} locale={locale} />
+        </FloatingToolbar>
+      ) : (
+        <div className="flex-shrink-0">
+          <Toolbar editor={editor} customTools={customTools} locale={locale} />
+        </div>
+      )}
       <div className="flex-1 min-h-0 flex overflow-hidden" ref={containerRef}>
         {showSource && (
           <>
@@ -452,10 +512,10 @@ export function WysiwygEditor({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <p className="mt-2 text-lg font-medium text-blue-700 dark:text-blue-200">
-              放开以导入 .md 文件
+              {m.drop.importHint}
             </p>
             <p className="mt-1 text-sm text-blue-500 dark:text-blue-300">
-              仅接受 Markdown 文件
+              {m.drop.onlyMarkdown}
             </p>
           </div>
         </div>
@@ -469,59 +529,60 @@ export function WysiwygEditor({
           <button type="button" onClick={() => execTableCmd('deleteTable')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            删除表格
+            {m.toolbar.tableDelete}
           </button>
           <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
           <button type="button" onClick={() => execTableCmd('addRowBefore')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            上方插入行
+            {m.toolbar.rowInsertBefore}
           </button>
           <button type="button" onClick={() => execTableCmd('addRowAfter')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            下方插入行
+            {m.toolbar.rowInsertAfter}
           </button>
           <button type="button" onClick={() => execTableCmd('deleteRow')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            删除行
+            {m.toolbar.rowDelete}
           </button>
           <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
           <button type="button" onClick={() => execTableCmd('addColumnBefore')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            左侧插入列
+            {m.toolbar.colInsertBefore}
           </button>
           <button type="button" onClick={() => execTableCmd('addColumnAfter')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            右侧插入列
+            {m.toolbar.colInsertAfter}
           </button>
           <button type="button" onClick={() => execTableCmd('deleteColumn')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            删除列
+            {m.toolbar.colDelete}
           </button>
           <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
           <button type="button" onClick={() => execTableCmd('mergeCells')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-            合并单元格
+            {m.toolbar.mergeCells}
           </button>
           <button type="button" onClick={() => execTableCmd('splitCell')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>
-            拆分单元格
+            {m.toolbar.splitCell}
           </button>
           <div className="border-t my-1 border-gray-200 dark:border-gray-700" />
           <button type="button" onClick={() => execTableCmd('toggleHeaderRow')}
             className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            表头行
+            {m.toolbar.headerRow}
           </button>
         </div>
       )}
     </div>
+    </EditorLocaleProvider>
   );
 }

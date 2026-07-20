@@ -1,0 +1,40 @@
+# 部署 / 环境配置
+Dockerfile
+docker-compose.yml
+.env.example
+.env
+pnpm-workspace.yaml
+next.config.ts
+postcss.config.mjs
+eslint.config.mjs
+tsconfig.json
+
+# 构建产物 / 缓存
+.next/
+.playwright-cli/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# 测试
+e2e-test.sh
+editor-test.png
+*.test.ts
+*.test.tsx
+__tests__/
+
+# Demo 应用（exports 未引用 src/app）
+src/app/
+public/screenshot*.png
+public/next.svg
+public/vercel.svg
+public/window.svg
+public/file.svg
+public/globe.svg
+public/article_example.md
+
+# 杂项文档
+petrichor_README copy.md
+
+# 包管理
+pnpm-lock.yaml
+package-lock.json

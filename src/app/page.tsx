@@ -3,8 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { exportMarkdown, exportHTML } from '@/lib/export';
-import { marked } from 'marked';
+import { markdownToHtml } from '@/lib/markdown-to-html';
 import { migrateMarkdownSyntax } from '@/lib/markdown-migrate';
+import { MermaidBlock } from '@/components/editor/mermaid-block';
+import { getDemoMessages, SUPPORTED_LOCALES, type Locale } from '@/components/editor/i18n';
 
 // 动态导入编辑器，避免 SSR 问题
 const WysiwygEditor = dynamic(
@@ -250,6 +252,8 @@ export default function Home() {
   const [showSource, setShowSource] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [locale, setLocale] = useState<Locale>('en');
+  const d = getDemoMessages(locale);
 
   useEffect(() => {
     fetch('/article_example.md')
@@ -266,9 +270,7 @@ export default function Home() {
   }, []);
 
   const htmlPreview = useMemo(() => {
-    const migrated = migrateMarkdownSyntax(content);
-    marked.setOptions({ breaks: true, gfm: true });
-    return marked.parse(migrated) as string;
+    return markdownToHtml(content);
   }, [content]);
 
   // 虚拟键盘检测
@@ -315,7 +317,7 @@ export default function Home() {
               type="button"
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
-              title={theme === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
+              title={theme === 'light' ? d.toggleDark : d.toggleLight}
             >
               {theme === 'light' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -343,7 +345,7 @@ export default function Home() {
                   ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
-              title={showSource ? '关闭源码编辑' : '打开源码编辑'}
+              title={showSource ? d.closeSource : d.openSource}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -354,7 +356,7 @@ export default function Home() {
               type="button"
               onClick={() => setShowHtmlPreview(true)}
               className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
-              title="HTML 预览"
+              title={d.htmlPreview}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="16 18 22 12 16 6"/>
@@ -382,7 +384,7 @@ export default function Home() {
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              导出
+              {d.export}
             </button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border rounded-lg shadow-lg z-20">
@@ -392,7 +394,7 @@ export default function Home() {
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg flex items-center gap-2"
                 >
                   <span className="text-gray-600 dark:text-gray-400">📄</span>
-                  导出 Markdown (.md)
+                  {d.exportMarkdown}
                 </button>
                 <button
                   type="button"
@@ -400,11 +402,21 @@ export default function Home() {
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg flex items-center gap-2"
                 >
                   <span className="text-gray-600 dark:text-gray-400">🌐</span>
-                  导出 HTML (.html)
+                  {d.exportHtml}
                 </button>
               </div>
             )}
           </div>
+          <select
+            aria-label={d.language}
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            className="px-2 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm"
+          >
+            {SUPPORTED_LOCALES.map((l) => (
+              <option key={l} value={l}>{l === 'en' ? 'English' : '中文'}</option>
+            ))}
+          </select>
           </div>
         </div>
       </header>
@@ -419,7 +431,7 @@ export default function Home() {
         }}
       >
         <div className="flex-1 min-h-0">
-          <WysiwygEditor content={content} onChange={setContent} showSource={showSource} onToggleSource={() => setShowSource(!showSource)} />
+          <WysiwygEditor content={content} onChange={setContent} showSource={showSource} onToggleSource={() => setShowSource(!showSource)} locale={locale} />
         </div>
       </main>
 
@@ -447,6 +459,7 @@ export default function Home() {
                 className="markdown-preview"
                 dangerouslySetInnerHTML={{ __html: htmlPreview }}
               />
+              <MermaidBlock locale={locale} />
             </div>
           </div>
         </div>
@@ -455,7 +468,7 @@ export default function Home() {
       {/* 页脚 */}
       <footer className="bg-white dark:bg-gray-800 border-t mt-auto">
         <div className="max-w-6xl mx-auto px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-          WYSIWYG Markdown Editor - 支持 Markdown 语法的所见即所得编辑器
+          {d.footer}
         </div>
       </footer>
     </div>
