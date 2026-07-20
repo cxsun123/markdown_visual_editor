@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Placeholder } from '@tiptap/extension-placeholder';
 import { defaultExtensions } from './extensions';
 import { Toolbar, type ToolbarCustomTool } from './toolbar';
 import { FloatingToolbar } from './floating-toolbar';

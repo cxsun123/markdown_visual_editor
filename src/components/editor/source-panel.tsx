@@ -3,6 +3,8 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import { common, createLowlight } from 'lowlight';
 import { toHtml } from 'hast-util-to-html';
+import { getEditorMessages } from './i18n';
+import { useEditorLocale } from './locale-context';
 
 const lowlight = createLowlight(common);
 
@@ -30,6 +32,8 @@ function highlightMarkdown(text: string): string {
 }
 
 export function SourcePanel({ markdown, activeLine, onChange }: SourcePanelProps) {
+  const locale = useEditorLocale();
+  const m = getEditorMessages(locale);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +95,7 @@ export function SourcePanel({ markdown, activeLine, onChange }: SourcePanelProps
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-[#1e1e1e] text-sm font-mono transition-colors">
       <div className="flex-shrink-0 px-3 py-1.5 bg-gray-100 dark:bg-[#252526] border-b border-gray-200 dark:border-[#3c3c3c] text-gray-500 dark:text-[#cccccc] text-xs transition-colors">
-        源码编辑
+        {m.toolbar.sourceEditor}
       </div>
       <div ref={containerRef} className="flex-1 min-h-0 relative overflow-hidden">
         <div

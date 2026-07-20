@@ -42,6 +42,7 @@ export type EditorMessages = {
     mergeCells: string;
     splitCell: string;
     headerRow: string;
+    sourceEditor: string;
     confirm: string;
     cancel: string;
   };
@@ -89,6 +90,7 @@ export type DemoMessages = {
   exportMarkdown: string;
   exportHtml: string;
   footer: string;
+  heading: string;
   language: string;
 };
 
@@ -102,6 +104,7 @@ const enDemo: DemoMessages = {
   exportMarkdown: 'Export Markdown (.md)',
   exportHtml: 'Export HTML (.html)',
   footer: 'WYSIWYG Markdown Editor - a What-You-See-Is-What-You-Get editor with Markdown support',
+  heading: 'WYSIWYG Markdown Editor',
   language: 'Language',
 };
 
@@ -114,7 +117,8 @@ const zhDemo: DemoMessages = {
   export: '导出',
   exportMarkdown: '导出 Markdown (.md)',
   exportHtml: '导出 HTML (.html)',
-  footer: 'WYSIWYG Markdown Editor - 支持 Markdown 语法的所见即所得编辑器',
+  footer: 'WYSIWYG Markdown 编辑器 - 支持 Markdown 语法的所见即所得编辑器',
+  heading: 'WYSIWYG Markdown 编辑器',
   language: '语言',
 };
 
@@ -196,6 +200,7 @@ const en: EditorMessages = {
     mergeCells: 'Merge cells',
     splitCell: 'Split cell',
     headerRow: 'Header row',
+    sourceEditor: 'Source editor',
     confirm: 'OK',
     cancel: 'Cancel',
   },
@@ -263,6 +268,7 @@ const zh: EditorMessages = {
     mergeCells: '合并单元格',
     splitCell: '拆分单元格',
     headerRow: '表头行',
+    sourceEditor: '源码编辑',
     confirm: '确定',
     cancel: '取消',
   },

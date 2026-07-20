@@ -308,9 +308,9 @@ export default function Home() {
       <header className="bg-white dark:bg-gray-800 border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <h1 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-              WYSIWYG Markdown Editor
-            </h1>
+              <h1 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                {d.heading}
+              </h1>
           </div>
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             <button
@@ -441,7 +441,7 @@ export default function Home() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] flex flex-col mx-4">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                HTML 预览
+                {d.htmlPreview}
               </h2>
               <button
                 type="button"
