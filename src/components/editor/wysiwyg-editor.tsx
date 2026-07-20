@@ -6,7 +6,7 @@ import { defaultExtensions } from './extensions';
 import { Toolbar, type ToolbarCustomTool } from './toolbar';
 import { FloatingToolbar } from './floating-toolbar';
 import { SourcePanel } from './source-panel';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { generateJSON } from '@tiptap/core';
 import { marked } from 'marked';
 import { migrateMarkdownSyntax } from '../../lib/markdown-migrate';
@@ -91,6 +91,7 @@ export function WysiwygEditor({
   customTools,
   floatingToolbar = true,
   locale = 'en',
+  placeholder,
 }: WysiwygEditorProps) {
   const m = getEditorMessages(locale);
   const editorRef = useRef<any>(null);
@@ -101,6 +102,16 @@ export function WysiwygEditor({
   const [sourceWidth, setSourceWidth] = useState(40); // percentage
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const extensions = useMemo(() => {
+    const text = placeholder ?? 'Start writing...\nMarkdown supported';
+    return defaultExtensions.map((ext) => {
+      if (ext.name === 'placeholder') {
+        return Placeholder.configure({ placeholder: text });
+      }
+      return ext;
+    });
+  }, [placeholder]);
 
   // Single source of truth: markdown content
   const [markdownContent, setMarkdownContent] = useState(content);
@@ -178,7 +189,7 @@ export function WysiwygEditor({
   }, [m]);
 
   const editor = useEditor({
-    extensions: defaultExtensions,
+    extensions,
     content,
     onCreate: ({ editor }) => {
       // Get initial markdown from editor state
