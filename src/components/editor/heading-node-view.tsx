@@ -159,7 +159,7 @@ export const HeadingNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
   }, [editValue]);
 
   const parseAndApply = (markdown: string) => {
-    const match = markdown.match(/^(#{1,6})\s+(.+)$/s);
+    const match = markdown.match(/^(#{1,6})\s+([\s\S]+)$/);
     if (!match) return;
 
     const newLevel = match[1].length;
