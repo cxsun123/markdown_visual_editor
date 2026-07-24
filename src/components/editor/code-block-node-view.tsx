@@ -38,7 +38,6 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       textareaRef.current.focus();
-      textareaRef.current.select();
     }
   }, [isEditing]);
 
@@ -119,6 +118,8 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
   };
 
   if (isEditing) {
+    const rows = Math.max(8, editValue.split('\n').length + 2);
+
     return (
       <NodeViewWrapper as="div" className="code-block-edit-wrapper my-4">
         <div className="border rounded-lg overflow-hidden">
@@ -126,10 +127,11 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
             <span>{nv.codeEditor} - {language}</span>
             <span className="text-gray-400">{nv.codeSaveHint}</span>
           </div>
-          <div className="relative">
+          <div className="relative" style={{ height: `${rows * 1.25 + 1.5}rem` }}>
             <pre
               ref={previewRef}
-              className="absolute inset-0 p-3 font-mono text-sm overflow-hidden whitespace-pre-wrap pointer-events-none select-none m-0 border-0 bg-white dark:bg-gray-900 rounded-none"
+              className="absolute inset-0 font-mono text-sm whitespace-pre-wrap pointer-events-none select-none border-0 bg-white dark:bg-gray-900 rounded-none"
+              style={{ padding: '0.75rem', overflow: 'hidden', margin: '0' }}
               dangerouslySetInnerHTML={{ __html: highlightedHtml }}
               aria-hidden="true"
             />
@@ -144,9 +146,9 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
                 }
               }}
               onKeyDown={handleKeyDown}
-              className="relative w-full p-3 font-mono text-sm border-0 focus:outline-none resize-none bg-transparent text-transparent caret-gray-800 dark:caret-gray-200"
-              rows={Math.max(8, editValue.split('\n').length + 2)}
+              className="absolute inset-0 p-3 font-mono text-sm border-0 focus:outline-none resize-none bg-transparent text-transparent caret-gray-800 dark:caret-gray-200 overflow-hidden whitespace-pre-wrap"
               spellCheck={false}
+              aria-label={nv.codeEditor}
             />
           </div>
           <div className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-800 border-t">
@@ -184,8 +186,9 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({ node, updateAttribu
         <pre
           ref={preRef}
           {...editHandlers}
-          className="p-4 rounded-lg overflow-x-auto cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
-          style={{ margin: 0 }}
+          contentEditable={false}
+          className="p-4 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+          style={{ margin: 0, whiteSpace: 'pre', overflowX: 'auto' }}
         >
           <code>{node.textContent}</code>
         </pre>

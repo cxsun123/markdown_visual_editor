@@ -1,6 +1,6 @@
 {
   "name": "@chengxinsun26/editor",
-  "version": "0.3.10",
+  "version": "0.3.12",
   "private": false,
   "exports": {
     ".": "./src/components/editor/index.ts",

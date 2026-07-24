@@ -33,14 +33,82 @@ function serializeNodeToMarkdown(node: unknown): string {
   return (n.textContent as string) || '';
 }
 
-export const HeadingNodeView: React.FC<NodeViewProps> = ({ node, updateAttributes }) => {
+function parseInlineMarkdown(text: string, schema: any): any[] {
+  const nodes: any[] = [];
+  let remaining = text;
+
+  while (remaining.length > 0) {
+    const linkMatch = remaining.match(/^\[(.+?)\]\((\S+?)(?:\s+"([^"]*)")?\)/);
+    if (linkMatch) {
+      const linkText = linkMatch[1];
+      const href = linkMatch[2];
+      const title = linkMatch[3];
+      const attrs: Record<string, string> = { href };
+      if (title) attrs.title = title;
+      nodes.push(schema.text(linkText, [schema.marks.link.create(attrs)]));
+      remaining = remaining.slice(linkMatch[0].length);
+      continue;
+    }
+
+    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
+    if (boldMatch) {
+      nodes.push(schema.text(boldMatch[1], [schema.marks.bold.create()]));
+      remaining = remaining.slice(boldMatch[0].length);
+      continue;
+    }
+
+    const italicMatch = remaining.match(/^\*(.+?)\*(?!\*)/);
+    if (italicMatch) {
+      nodes.push(schema.text(italicMatch[1], [schema.marks.italic.create()]));
+      remaining = remaining.slice(italicMatch[0].length);
+      continue;
+    }
+
+    const strikeMatch = remaining.match(/^~~(.+?)~~/);
+    if (strikeMatch) {
+      nodes.push(schema.text(strikeMatch[1], [schema.marks.strike.create()]));
+      remaining = remaining.slice(strikeMatch[0].length);
+      continue;
+    }
+
+    const codeMatch = remaining.match(/^`([^`]+)`/);
+    if (codeMatch) {
+      nodes.push(schema.text(codeMatch[1], [schema.marks.code.create()]));
+      remaining = remaining.slice(codeMatch[0].length);
+      continue;
+    }
+
+    const nextSpecial = remaining.search(/[[*`~_<$]/);
+    if (nextSpecial === 0) {
+      nodes.push(schema.text(remaining[0]));
+      remaining = remaining.slice(1);
+    } else if (nextSpecial === -1) {
+      nodes.push(schema.text(remaining));
+      remaining = '';
+    } else {
+      nodes.push(schema.text(remaining.slice(0, nextSpecial)));
+      remaining = remaining.slice(nextSpecial);
+    }
+  }
+
+  return nodes;
+}
+
+export const HeadingNodeView: React.FC<NodeViewProps> = ({ node, updateAttributes, editor, getPos }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isEditingRef = useRef(false);
+  const editorRef = useRef(editor);
+  const getPosRef = useRef(getPos);
 
   const { level } = node.attrs;
+
+  useEffect(() => {
+    editorRef.current = editor;
+    getPosRef.current = getPos;
+  });
 
   useEffect(() => {
     isEditingRef.current = isEditing;
@@ -91,12 +159,28 @@ export const HeadingNodeView: React.FC<NodeViewProps> = ({ node, updateAttribute
   }, [editValue]);
 
   const parseAndApply = (markdown: string) => {
-    const match = markdown.match(/^(#{1,6})\s+(.+)$/);
-    if (match) {
-      const newLevel = match[1].length;
-      console.log('Updating heading:', { level: newLevel, text: match[2] });
-      updateAttributes({ level: newLevel });
-    }
+    const match = markdown.match(/^(#{1,6})\s+(.+)$/s);
+    if (!match) return;
+
+    const newLevel = match[1].length;
+    const contentText = match[2];
+
+    const ed = editorRef.current;
+    const posFn = getPosRef.current;
+    if (!ed || !posFn) return;
+
+    const pos = posFn();
+    if (typeof pos !== 'number') return;
+
+    const headingNode = ed.state.doc.nodeAt(pos);
+    if (!headingNode) return;
+
+    const textNodes = parseInlineMarkdown(contentText, ed.state.schema);
+
+    const tr = ed.state.tr;
+    tr.replaceWith(pos + 1, pos + headingNode.nodeSize, textNodes);
+    tr.setNodeMarkup(pos, null, { level: newLevel });
+    ed.view.dispatch(tr);
   };
 
   if (isEditing) {
