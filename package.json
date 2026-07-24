@@ -1,6 +1,6 @@
 {
   "name": "@chengxinsun26/editor",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "private": false,
   "exports": {
     ".": "./src/components/editor/index.ts",
@@ -11,9 +11,9 @@
     "./styles/hljs-source.css": "./src/styles/hljs-source.css"
   },
   "peerDependencies": {
+    "next": "^16",
     "react": "^19",
-    "react-dom": "^19",
-    "next": "^16"
+    "react-dom": "^19"
   },
   "scripts": {
     "dev": "next dev",
@@ -24,9 +24,9 @@
   "dependencies": {
     "@tiptap/core": "^3.27.4",
     "@tiptap/extension-blockquote": "^3.27.4",
-    "@tiptap/extension-heading": "^3.27.4",
     "@tiptap/extension-code-block-lowlight": "^3.27.4",
     "@tiptap/extension-color": "^3.27.4",
+    "@tiptap/extension-heading": "^3.27.4",
     "@tiptap/extension-highlight": "^3.27.4",
     "@tiptap/extension-image": "^3.27.4",
     "@tiptap/extension-link": "^3.27.4",
